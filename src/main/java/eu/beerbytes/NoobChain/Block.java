@@ -1,15 +1,31 @@
 package eu.beerbytes.NoobChain;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Block {
 
 	private String hash;
 	private String previousHash;
-	private String data; 
+	private String merkleRoot;
+	private List<Transaction> transactions;
 	private long timeStamp; 
 	private int numberUsedOnce;
 	
+	public Block(String previousHash) {
+		super();
+		this.previousHash = previousHash;
+		this.timeStamp = new Date().getTime();
+		this.transactions = new ArrayList<>();
+		this.hash = "";
+		this.merkleRoot = "";
+	}
+
+	public List<Transaction> getTransactions() {
+		return transactions;
+	}
+
 	public String getHash() {
 		return hash;
 	}
@@ -26,19 +42,12 @@ public class Block {
 		this.previousHash = previousHash;
 	}
 
-	public Block(String data, String previousHash) {
-		super();
-		this.data = data;
-		this.previousHash = previousHash;
-		this.timeStamp = new Date().getTime();
-		this.hash = "";
-	}
-
 	public String calculateHash() {
-		return new CryptoUtil().applySha256(previousHash + Long.toString(timeStamp) + Integer.toString(numberUsedOnce) + data);
+		return new CryptoUtil().applySha256(previousHash + Long.toString(timeStamp) + Integer.toString(numberUsedOnce) + merkleRoot);
 	}
 	
 	public void mine(int difficulty) {
+		merkleRoot = new CryptoUtil().getMerkleRoot(transactions);
 		String target = createTarget(difficulty);
 		while (hash.isEmpty() || !hash.substring(0, difficulty).equals(target)) {
 			numberUsedOnce++;
@@ -46,6 +55,27 @@ public class Block {
 		}
 		
 		System.out.println("Block Mined!!! : " + hash + "   nonce=" + numberUsedOnce);
+	}
+	
+	public boolean addTransaction(Transaction transaction) {
+		if(transaction == null){
+			return false;		
+		}
+		
+		if(!isGenesisBlock()) {
+			boolean isTransactionProcessed = transaction.processTransaction();
+			if((!isTransactionProcessed)) {
+				System.out.println("Transaction failed to process. Discarded.");
+				return false;
+			}
+		} 
+		transactions.add(transaction);
+		System.out.println("Transaction Successfully added to Block");
+		return true;
+	}
+
+	private boolean isGenesisBlock() {
+		return "0".equals(previousHash);
 	}
 	
 	private String createTarget(int difficulty) {
