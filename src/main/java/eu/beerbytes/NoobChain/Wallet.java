@@ -17,12 +17,14 @@ import java.util.Map;
 public class Wallet {
 	private PublicKey publicKey;
 	private PrivateKey privateKey;
+	private BlockChain blockChain;
 	
 	public Map<String,TransactionOutput> unusedTxOutputs = new HashMap<String,TransactionOutput>(); 
 	
-	public Wallet() {
+	public Wallet(BlockChain blockChain) {
 		generateKeyPair();
 		unusedTxOutputs = new HashMap<String,TransactionOutput>();
+		this.blockChain = blockChain;
 	}
 
 	public PublicKey getPublicKey() {
@@ -49,9 +51,9 @@ public class Wallet {
 		}
 	}
 	
-	public float getBalance() {
+	public float getBalance() { 
 		float total = 0;
-		for (Map.Entry<String, TransactionOutput> item : NoobChain.unusedTxOutputs.entrySet()) {
+		for (Map.Entry<String, TransactionOutput> item : blockChain.getUnusedTxOutputs().entrySet()) {
 			TransactionOutput unusedTxOutput = item.getValue();
 
 			if (unusedTxOutput.checkOwnership(publicKey)) {
@@ -62,7 +64,7 @@ public class Wallet {
 		return total;
 	}
 	
-	public Transaction sendFunds(PublicKey recipient, float value) {
+	public Transaction sendMoney(PublicKey recipient, float value) {
 		if (getBalance() < value) { 
 			System.out.println("#Not Enough funds to send transaction. Transaction Discarded.");
 			return null;
@@ -85,7 +87,7 @@ public class Wallet {
 		newTransaction.sign(privateKey);
 
 		for (TransactionInput input : inputs) {
-			unusedTxOutputs.remove(input.transactionOutputId);
+			unusedTxOutputs.remove(input.getTransactionOutputId());
 		}
 		
 		return newTransaction;

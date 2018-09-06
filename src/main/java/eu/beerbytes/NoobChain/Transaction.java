@@ -4,9 +4,11 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Transaction {
-	private static int sequence = 0;
+	private static float MINIMUM_TRANSACTION = 0.1f;
+	private static int sequence = 0; // refactor
 
 	private String transactionId;
 	private PublicKey sender;
@@ -46,7 +48,7 @@ public class Transaction {
 		return outputs;
 	}
 
-	public boolean processTransaction() {
+	public boolean processTransaction(Map<String, TransactionOutput> unusedTxOutputs) {
 		if(!verifySignature()) {
 			System.out.println("#Transaction Signature failed to verify");
 			return false;
@@ -54,11 +56,11 @@ public class Transaction {
 				
 		//gather transaction inputs (Make sure they are unspent):
 		for(TransactionInput i : inputs) {
-			i.unspentTransactionOutput = NoobChain.unusedTxOutputs.get(i.transactionOutputId);
+			i.setUnspentTransactionOutput(unusedTxOutputs.get(i.getTransactionOutputId()));
 		}
 
 		//check if transaction is valid:
-		if(getInputsValue() < NoobChain.minimumTransaction) {
+		if(getInputsValue() < MINIMUM_TRANSACTION) {
 			System.out.println("#Transaction Inputs to small: " + getInputsValue());
 			return false;
 		}
@@ -71,13 +73,13 @@ public class Transaction {
 				
 		//add outputs to Unspent list
 		for(TransactionOutput o : outputs) {
-			NoobChain.unusedTxOutputs.put(o.id , o);
+			unusedTxOutputs.put(o.id , o);
 		}
 		
 		//remove transaction inputs from UTXO lists as spent:
 		for(TransactionInput i : inputs) {
-			if(i.unspentTransactionOutput == null) continue; //if Transaction can't be found skip it 
-			NoobChain.unusedTxOutputs.remove(i.unspentTransactionOutput.id);
+			if(i.getUnspentTransactionOutput() == null) continue; //if Transaction can't be found skip it 
+			unusedTxOutputs.remove(i.getUnspentTransactionOutput().id);
 		}
 		
 		System.out.println("Debug transaction" + this);
@@ -104,9 +106,9 @@ public class Transaction {
 	public float getInputsValue() {
 		float total = 0;
 		for (TransactionInput input : inputs) {
-			if (input.unspentTransactionOutput == null)
+			if (input.getUnspentTransactionOutput() == null)
 				continue; // if Transaction can't be found skip it
-			total += input.unspentTransactionOutput.value;
+			total += input.getUnspentTransactionOutput().value;
 		}
 		return total;
 	}

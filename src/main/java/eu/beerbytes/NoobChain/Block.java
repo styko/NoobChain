@@ -3,9 +3,9 @@ package eu.beerbytes.NoobChain;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class Block {
-
 	private String hash;
 	private String previousHash;
 	private String merkleRoot;
@@ -30,40 +30,36 @@ public class Block {
 		return hash;
 	}
 
-	public void setHash(String hash) {
-		this.hash = hash;
-	}
-
 	public String getPreviousHash() {
 		return previousHash;
 	}
 
-	public void setPreviousHash(String previousHash) {
-		this.previousHash = previousHash;
-	}
-
-	public String calculateHash() {
-		return new CryptoUtil().applySha256(previousHash + Long.toString(timeStamp) + Integer.toString(numberUsedOnce) + merkleRoot);
+	public String calculateHash(CryptoUtil cryptoUtil) {
+		return cryptoUtil.applySha256(
+				previousHash 
+				+ Long.toString(timeStamp) 
+				+ Integer.toString(numberUsedOnce) 
+				+ merkleRoot);
 	}
 	
-	public void mine(int difficulty) {
-		merkleRoot = new CryptoUtil().getMerkleRoot(transactions);
+	public void mine(int difficulty, CryptoUtil cryptoUtil) {
+		merkleRoot = cryptoUtil.getMerkleRoot(transactions);
 		String target = createTarget(difficulty);
 		while (hash.isEmpty() || !hash.substring(0, difficulty).equals(target)) {
 			numberUsedOnce++;
-			hash = calculateHash();
+			hash = calculateHash(cryptoUtil);
 		}
 		
 		System.out.println("Block Mined!!! : " + hash + "   nonce=" + numberUsedOnce);
 	}
 	
-	public boolean addTransaction(Transaction transaction) {
+	public boolean addTransaction(Transaction transaction, Map<String, TransactionOutput> unusedTxOutputs) {
 		if(transaction == null){
 			return false;		
 		}
 		
 		if(!isGenesisBlock()) {
-			boolean isTransactionProcessed = transaction.processTransaction();
+			boolean isTransactionProcessed = transaction.processTransaction(unusedTxOutputs);
 			if((!isTransactionProcessed)) {
 				System.out.println("Transaction failed to process. Discarded.");
 				return false;
