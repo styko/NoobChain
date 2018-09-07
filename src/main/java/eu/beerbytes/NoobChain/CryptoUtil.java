@@ -94,5 +94,7 @@ public class CryptoUtil {
 		return 0xff & hash[i];
 	}
 	
-
+	public String createTarget(int difficulty) {
+		return String.format("%0"+difficulty+"d", 0);
+	}
 }

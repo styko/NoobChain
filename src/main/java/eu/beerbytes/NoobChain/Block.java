@@ -44,7 +44,7 @@ public class Block {
 	
 	public void mine(int difficulty, CryptoUtil cryptoUtil) {
 		merkleRoot = cryptoUtil.getMerkleRoot(transactions);
-		String target = createTarget(difficulty);
+		String target = cryptoUtil.createTarget(difficulty);
 		while (hash.isEmpty() || !hash.substring(0, difficulty).equals(target)) {
 			numberUsedOnce++;
 			hash = calculateHash(cryptoUtil);
@@ -72,9 +72,5 @@ public class Block {
 
 	private boolean isGenesisBlock() {
 		return "0".equals(previousHash);
-	}
-	
-	private String createTarget(int difficulty) {
-		return String.format("%0"+difficulty+"d", 0);
 	}
 }

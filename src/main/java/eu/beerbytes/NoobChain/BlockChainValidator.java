@@ -14,7 +14,7 @@ public class BlockChainValidator {
 	}
 
 	public Boolean isChainValid(ArrayList<Block> blockchain,int difficulty, Transaction genesisTransaction ) {
-		String hashTarget = new String(new char[difficulty]).replace('\0', '0');
+		String hashTarget = cryptoUtil.createTarget(difficulty);
 		
 		Map<String,TransactionOutput> tempUnusedTxOutputs = new HashMap<String,TransactionOutput>(); //a temporary working list of unspent transactions at a given block state.
 		tempUnusedTxOutputs.put(genesisTransaction.getOutputs().get(0).id, genesisTransaction.getOutputs().get(0));
