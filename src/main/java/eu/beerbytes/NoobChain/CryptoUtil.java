@@ -6,34 +6,11 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 
 public class CryptoUtil {
 	static {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-	}
-	
-	public String getMerkleRoot(List<Transaction> transactions) { //TODO rework
-		int countOfTransactions = transactions.size();
-		
-		List<String> previousTreeLayer = new ArrayList<String>();
-		for(Transaction transaction : transactions) {
-			previousTreeLayer.add(transaction.getTransactionId());
-		}
-		
-		List<String> treeLayer = previousTreeLayer;
-		while(countOfTransactions > 1) {
-			treeLayer = new ArrayList<String>();
-			for(int i=1; i < previousTreeLayer.size(); i++) {
-				treeLayer.add(applySha256(previousTreeLayer.get(i-1) + previousTreeLayer.get(i)));
-			}
-			countOfTransactions = treeLayer.size();
-			previousTreeLayer = treeLayer;
-		}
-		
-		return (treeLayer.size() == 1) ? treeLayer.get(0) : "";
 	}
 	
 	public byte[] sign(PrivateKey privateKey, String input){

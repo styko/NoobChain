@@ -4,8 +4,9 @@ public class NoobCoin {
 	
 	public static void main(String[] args) {
 		CryptoUtil cryptoUtil = new CryptoUtil();
+		MerkleRootCalculator merkleRootCalculator = new MerkleRootCalculator(cryptoUtil);
 		int difficulty = 3;
-		BlockChain blockChain = new BlockChain(cryptoUtil, difficulty);
+		BlockChain blockChain = new BlockChain(cryptoUtil, merkleRootCalculator, difficulty);
 		
 		Wallet walletA = new Wallet(blockChain);
 		Wallet walletB = new Wallet(blockChain);

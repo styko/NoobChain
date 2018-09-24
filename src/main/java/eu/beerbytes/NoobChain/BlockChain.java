@@ -9,11 +9,13 @@ public class BlockChain {
 	private ArrayList<Block> blockchain = new ArrayList<Block>();
 	private CryptoUtil cryptoUtil;
 	private int difficulty;
+	private MerkleRootCalculator merkleRootCalculator;
 
-	public BlockChain(CryptoUtil cryptoUtil, int difficulty) {
+	public BlockChain(CryptoUtil cryptoUtil, MerkleRootCalculator merkleRootCalculator, int difficulty) {
 		super();
 		this.cryptoUtil = cryptoUtil;
 		this.difficulty = difficulty;
+		this.merkleRootCalculator = merkleRootCalculator;
 	}
 
 	public ArrayList<Block> getBlockchain() {
@@ -21,7 +23,7 @@ public class BlockChain {
 	}
 
 	public void addBlock(Block newBlock) {
-		newBlock.mine(difficulty, cryptoUtil);
+		newBlock.mine(difficulty, cryptoUtil, merkleRootCalculator);
 		blockchain.add(newBlock);
 	}
 

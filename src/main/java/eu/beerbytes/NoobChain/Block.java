@@ -42,8 +42,8 @@ public class Block {
 				+ merkleRoot);
 	}
 	
-	public void mine(int difficulty, CryptoUtil cryptoUtil) {
-		merkleRoot = cryptoUtil.getMerkleRoot(transactions);
+	public void mine(int difficulty, CryptoUtil cryptoUtil, MerkleRootCalculator merkleRootCalculator) {
+		merkleRoot = merkleRootCalculator.getMerkleRoot(transactions);
 		String target = cryptoUtil.createTarget(difficulty);
 		while (hash.isEmpty() || !hash.substring(0, difficulty).equals(target)) {
 			numberUsedOnce++;
